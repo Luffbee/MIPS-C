@@ -1,0 +1,215 @@
+    //      PCWr, PCWrCond, PCSrc,
+    //      IRWr, MemRd, MemWr, IorD,
+    //      RegWA, RegWD, RegWr,
+    //      UnsImm, ALUSrcA, ALUSrcB, ALUOp,
+    //      HLWD, HiWr, LoWr, CP0Wr,
+    //      Syscall, Break
+    // Exception start
+    // ex: PC = KTEXT
+    // PCSrc = 100, PCWr = 1
+    // upc = 0
+1_0_100__0_0_0_0__00_000_0__0_00_000_0__0_0_0_0__0_0__00
+    // Exception end
+
+
+    // Pre start
+    // fetch: PC = PC+4, set IR
+    // IorD = 0, MemRd = 1, IRWr = 1,
+    // ALUSrcA = 10, ALUSrcB = 11, ALUOp = 0, PCWr = 1, PCSrc = 000
+    // upc = 1
+1_0_000__1_1_0_0__00_000_0__0_10_011_0__0_0_0_0__0_0__01
+    // decode: A = RF[rs], B = RF[rt], C0 = cp0[rd], ALUOUT = PC + offset
+    // UnsImm = 0, ALUSrcA = 10, ALUSrcB = 01, ALUOp = 0
+    // upc = 2
+0_0_000__0_0_0_0__00_000_0__0_10_100_0__0_0_0_0__0_0__11
+    // Pre end
+
+
+    // Mem start
+    // addr: ALUOUT = rs + imm(memory address)
+    // IorD = 1, UnsImm = 0, ALUSrcA = 00, ALUSrcB = 01, ALUOp = 0
+    // upc = 3
+0_0_000__0_0_0_1__00_000_0__0_00_001_0__0_0_0_0__0_0__11
+
+    // load1: MDR = mem[ALUOUT]
+    // IorD = 1, MemRd = 1 
+    // upc = 4
+0_0_000__0_1_0_1__00_000_0__0_00_000_0__0_0_0_0__0_0__01
+    // load2: RF[rt] = MDR
+    // RegWA = 01, RegWD = 001, RegWr = 1
+    // upc = 5
+0_0_000__0_0_0_0__01_001_1__0_00_000_0__0_0_0_0__0_0__00
+
+    // store: mem[ALUOUT] = B
+    // IorD = 1, MemWr = 1
+    // upc = 6
+0_0_000__0_0_1_1__00_000_0__0_00_000_0__0_0_0_0__0_0__00
+    // Mem end
+
+    // R-R start
+    // calc: ALUOUT = func(A, B)
+    // ALUSrcA = 00, ALUSrcB = 00, ALUOp = 1
+    // upc = 7
+0_0_000__0_0_0_0__00_000_0__0_00_000_1__0_0_0_0__0_0__11
+
+    // shift: ALUOUT = shift(shift_s, B)
+    // ALUSrcA = 01, ALUSrcB = 00, ALUOp = 1
+    // upc = 8
+0_0_000__0_0_0_0__00_000_0__0_01_000_1__0_0_0_0__0_0__01
+    // alu2rd: RF[sd] = ALUOUT
+    // RegWA = 00, RegWD = 000, RegWr = 1
+    // upc = 9
+0_0_000__0_0_0_0__00_000_1__0_00_000_0__0_0_0_0__0_0__00
+
+    // alu2hilo: {HI, LO} = ALUOUT
+    // HLWD = 0, HiWr = 1, LoWr = 1
+    // upc = 10
+0_0_000__0_0_0_0__00_000_0__0_00_000_0__0_1_1_0__0_0__00
+    // R-R end
+
+
+    // R-I start
+    // sigcalc: ALUOUT = func(A, sigimm)
+    // UnsImm = 0, ALUSrcA = 00, ALUSrcB = 01, ALUOp = 1
+    // upc = 11
+0_0_000__0_0_0_0__00_000_0__0_00_001_1__0_0_0_0__0_0__10
+
+    // unscalc: ALUOUT = func(B, unsimm)
+    // UnsImm = 1, ALUSrcA = 00, ALuSrcB = 01, ALUOp = 1
+    // upc = 12
+0_0_000__0_0_0_0__00_000_0__1_00_001_1__0_0_0_0__0_0__01
+    // alu2rt: RF[rt] = ALUOUT
+    // RegWA = 01, RegWD = 000, RegWr = 1
+    // upc = 13
+0_0_000__0_0_0_0__01_000_1__0_00_000_0__0_0_0_0__0_0__00
+    // R-I end
+
+
+    // LUI start
+    // lui: RF[rt] = lui
+    // RegWA = 01, RegWD = 110, RegWr = 1
+    // upc = 14
+0_0_000__0_0_0_0__01_110_1__0_00_000_0__0_0_0_0__0_0__00
+    // LUI end
+
+
+    // MFHI start
+    // mfhi: RF[rd] = HI
+    // RegWA = 00, RegWD = 011, RegWr = 1
+    // upc = 15
+0_0_000__0_0_0_0__00_011_1__0_00_000_0__0_0_0_0__0_0__00
+    // MFHI end
+
+
+    // MFLO start
+    // mflo: RF[rd] = LO
+    // RegWA = 00, RegWD = 100, RegWr = 1
+    // upc = 16
+0_0_000__0_0_0_0__00_100_1__0_00_000_0__0_0_0_0__0_0__00
+    // MFLO end
+
+
+    // MFC0 start
+    // mfc0: RF[rt] = C0
+    // RegWA = 01, RegWD = 101, RegWr = 1
+    // upc = 17
+0_0_000__0_0_0_0__01_101_1__0_00_000_0__0_0_0_0__0_0__00
+    // MFC0 end
+
+
+    // MTHI start
+    // mthi: HI = A
+    // HLWD = 1, HiWr = 1
+    // upc = 18
+0_0_000__0_0_0_0__00_000_0__0_00_000_0__1_1_0_0__0_0__00
+    // MTHI end
+
+
+    // MTLO start
+    // mtlo: LO = A
+    // HLWD = 1, LoWr = 1
+    // upc = 19
+0_0_000__0_0_0_0__00_000_0__0_00_000_0__1_0_1_0__0_0__00
+    // MTLO end
+
+
+    // MTC0 start
+    // mtc0: cp0[rd] = B
+    // CP0Wr = 1
+    // upc = 20
+0_0_000__0_0_0_0__00_000_0__0_00_000_0__0_0_0_1__0_0__00
+    // MTC0 end
+
+
+    // ERET start
+    // eret: PC = EPC
+    // PCSrc = 101, PCWr = 1
+    // upc = 21
+1_0_101__0_0_0_0__00_000_0__0_00_000_0__0_0_0_0__0_0__00
+    // ERET end
+
+
+    // J start
+    // j: PC = pc_j
+    // PCSrc = 001, PCWr = 1
+    // upc = 22
+1_0_001__0_0_0_0__00_000_0__0_00_000_0__0_0_0_0__0_0__00
+    // J end
+
+
+    // JAL start
+    // jal: RF[31] = PC, PC = pc_j
+    // RegWA = 11, RegWD = 010, RegWr = 1,
+    // PCSrc = 001, PCWr = 1
+    // upc = 23
+1_0_001__0_0_0_0__11_010_1__0_00_000_0__0_0_0_0__0_0__00
+    // JAL end
+
+
+    // JR start
+    // jr: PC = A
+    // PCSrc = 010, PCWr = 1
+    // upc = 24
+1_0_010__0_0_0_0__00_000_0__0_00_000_0__0_0_0_0__0_0__00
+    // JR end
+
+
+    // JALR start
+    // jalr: RF[rd] = PC, PC = A
+    // RegWA = 00, RegWD = 010, RegWr = 1,
+    // PCSrc = 010, PCWr = 1
+    // upc = 25
+1_0_010__0_0_0_0__00_010_1__0_00_000_0__0_0_0_0__0_0__00
+    // JALR end
+
+
+    // RRBranch start
+    // rrb: test(func(A, B))
+    // ALUSrcA = 00, ALUSrcB = 00, ALUOp = 1, PCSrc = 011, PCWrCond = 1
+    // upc = 26
+0_1_011__0_0_0_0__00_000_0__0_00_000_1__0_0_0_0__0_0__00
+    // RRBranch end
+
+
+    // RZBranch start
+    // rzb: test(func(A, 0))
+    // ALUSrcA = 00, ALUSrcB = 10, ALUOp = 1, PCSrc = 011, PCWrCond = 1
+    // upc = 27
+0_1_011__0_0_0_0__00_000_0__0_00_010_1__0_0_0_0__0_0__00
+    // RZBranch end
+
+
+    // Syscall start
+    // syscall:
+    // Syscall = 1
+    // upc = 28
+0_0_000__0_0_0_0__00_000_0__0_00_000_0__0_0_0_0__1_0__00
+    // Syscall end
+
+
+    // Break start
+    // break:
+    // Break = 1
+    // upc = 29
+0_0_000__0_0_0_0__00_000_0__0_00_000_0__0_0_0_0__0_1__00
+    // Break end
